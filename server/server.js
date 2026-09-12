@@ -1,22 +1,30 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+
+dotenv.config();
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
-// Test route
 app.get("/", (req, res) => {
-    res.json({
-        message: "SIH Artisan Marketplace API is running 🚀"
-    });
+  res.json({ message: "SIH26090 Artisan Marketplace API is running" });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/artisans", require("./routes/artisanRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
+app.use("/api/market", require("./routes/marketRoutes"));
+
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
